@@ -1,6 +1,7 @@
 #pragma once
 #include <rack.hpp>
 #include <extism.h>
+#include <stdio.h>
 
 using namespace rack;
 

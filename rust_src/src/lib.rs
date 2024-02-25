@@ -5,7 +5,6 @@ pub fn calc_value(time: f32) -> f32 {
 }
 
 #[plugin_fn]
-pub fn print_value(input_time: String) -> FnResult<String> {
-    Ok( calc_value(input_time.parse::<f32>().unwrap()).to_string() )
-    //Ok( format!("poop") )
+pub fn rust_wasm_sine(input_time: f32) -> FnResult<f32> {
+    Ok( calc_value(input_time) )
 }

@@ -31,21 +31,26 @@ struct RustismOsc : Module
 		configOutput(SINE_OUTPUT, "");
 	}
 
-	const char *manifest = "{\"wasm\": [{\"url\": "
-						   "\"../../rust_src/target/wasm32-unknown-unknown/debug/oscillator.wasm\"}]}";
+	const char *manifest = "{\"wasm\": [{\"url\":\"../../rust_src/target/wasm32-unknown-unknown/release/oscillator.wasm\"}]}";
 
-	// char *errmsg = NULL;
-	// ExtismPlugin *plugin = extism_plugin_new(
-	// 	(const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
-	// if (plugin == NULL)
-	// {
-	// 	fprintf(stderr, "ERROR: %s\n", errmsg);
+	char *errmsg = NULL;
+	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
+	// TODO: not sure why the block below seems to be throwing an error that would suggest that something is 
+	// wrong with the line above
+	// if(plugin == NULL){
+	// 	DEBUG(stderr, "ERROR: %s\n", errmsg);
 	// 	extism_plugin_new_error_free(errmsg);
 	// 	exit(1);
 	// }
 
 	void process(const ProcessArgs &args) override
 	{
+		// call the wasm function once per second
+		if( (args.frame % int64_t(args.sampleRate)) == 0 ){
+			DEBUG("CALLING WASM FUNCTION AT TIME %f", args.sampleTime);
+			int rust_wasm_output = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t *)&args.sampleTime, sizeof(args.sampleTime));
+			DEBUG("OUTPUT: %d\n", rust_wasm_output);
+		}
 	}
 };
 
