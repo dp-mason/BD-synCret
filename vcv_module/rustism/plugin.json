@@ -1,0 +1,23 @@
+{
+  "slug": "rustism",
+  "name": "rustism",
+  "version": "2.0.0",
+  "license": "CC0",
+  "brand": "rustism",
+  "author": "dp-mason",
+  "authorEmail": "davidpattenmason@gmail.com",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "RustismOsc",
+      "name": "RustismOsc",
+      "description": "Dead simple oscillator used to test if extism can be used to write audio plugins for vcv rack in alternative languages",
+      "tags": []
+    }
+  ]
+}
