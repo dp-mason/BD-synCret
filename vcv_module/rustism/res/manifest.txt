@@ -1,0 +1,2 @@
+"{\"wasm\": [{\"path\": \"" + (asset::plugin(pluginInstance, "res/oscillator.wasm")) + "\"}]}"
+"{\"wasm\": [{\"path\":" (asset::plugin(pluginInstance, "res/oscillator.wasm")) + "}]}"

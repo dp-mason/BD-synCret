@@ -31,10 +31,10 @@ struct RustismOsc : Module
 		configOutput(SINE_OUTPUT, "");
 	}
 
-	//const char *manifest = "{\"wasm\": [{\"url\":\"../../rust_src/target/wasm32-unknown-unknown/release/oscillator.wasm\"}]}";
-	const char *manifest = "{\"wasm\": [{\"url\": "
-                           "\"https://github.com/extism/plugins/releases/latest/"
-                           "download/count_vowels.wasm\"}]}";
+	const char *manifest = "{\"wasm\": [{\"path\":\"/home/david/.Rack2/plugins/rustism/res/oscillator.wasm\"}]}";
+	// const char *manifest = "{\"wasm\": [{\"url\": "
+    //                        "\"https://github.com/extism/plugins/releases/latest/"
+    //                        "download/count_vowels.wasm\"}]}";
 
 
 	char *errmsg = NULL;
@@ -53,12 +53,11 @@ struct RustismOsc : Module
 		if( (args.frame % (int64_t(args.sampleRate) * 5)) == 0 ){
 			DEBUG("CALLING WASM FUNCTION AT TIME %f", args.sampleTime);
 			
-			//int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t *)&args.sampleTime, sizeof(args.sampleTime));
-			const char *input = "Hello, world!";
-			int rc = extism_plugin_call(plugin, "count_vowels",(const uint8_t *)input, strlen(input));
+			int rc = extism_plugin_call(plugin, "rust_wasm_sine",(const uint8_t *)&args.sampleTime, sizeof(args.sampleTime));
 			if (rc == EXTISM_SUCCESS) {
 				DEBUG("GOOD");
 			}
+			DEBUG( "PLUGIN INSTALL PATH = %s", manifest );
   			// 	fprintf(stderr, "ERROR: %s\n", extism_plugin_error(plugin));
   			// 	exit(2);
 			// } else {
