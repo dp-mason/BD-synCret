@@ -50,26 +50,24 @@ struct RustismOsc : Module
 	void process(const ProcessArgs &args) override
 	{
 		// call the wasm function once per second
-		if( (args.frame % (int64_t(args.sampleRate) * 5)) == 0 ){
-			float seconds = float(args.frame / (int64_t(args.sampleRate)));
-			DEBUG("CALLING WASM FUNCTION AT TIME %f", seconds );
-			
-			int rc = extism_plugin_call(plugin, "rust_wasm_sine",(const uint8_t *)&seconds, sizeof(args.sampleTime));
-			if (rc == EXTISM_SUCCESS) {
-				DEBUG("GOOD");
-			}
-			DEBUG( "PLUGIN INSTALL PATH = %s", manifest );
-  			// 	fprintf(stderr, "ERROR: %s\n", extism_plugin_error(plugin));
-  			// 	exit(2);
-			// } else {
-			float *rustWasmOutput;
-			size_t outlen = extism_plugin_output_length(plugin);
-			const uint8_t *rust_wasm_out_mem = extism_plugin_output_data(plugin);
-			DEBUG( "FLOAT OUTPUT ROM WASM = %f", *((float*)(rust_wasm_out_mem)));
-
-			// 	DEBUG("OUTPUT: %f\n", *rustWasmOutput);
-			// }
+		//if( args.frame % (int64_t(args.sampleRate)) == 0 ){
+		float seconds = float(args.frame / (int64_t(args.sampleRate)));
+		DEBUG("CALLING WASM FUNCTION AT TIME %f", seconds );
+		
+		int rc = extism_plugin_call(plugin, "rust_wasm_sine",(const uint8_t *)&seconds, sizeof(args.sampleTime));
+		if (rc == EXTISM_SUCCESS) {
+			DEBUG("GOOD");
 		}
+		DEBUG( "PLUGIN INSTALL PATH = %s", manifest );
+		// 	fprintf(stderr, "ERROR: %s\n", extism_plugin_error(plugin));
+		// 	exit(2);
+		// } else {
+		//size_t outlen = extism_plugin_output_length(plugin);
+		const uint8_t *rust_wasm_out_mem = extism_plugin_output_data(plugin);
+		DEBUG( "FLOAT OUTPUT ROM WASM = %f", *((float*)(rust_wasm_out_mem)));
+
+		outputs[SINE_OUTPUT].setVoltage(*((float*)(rust_wasm_out_mem)));
+		//}
 	}
 };
 
