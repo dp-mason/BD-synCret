@@ -4,3 +4,4 @@
 /vcv_module/rustism/build
 /vcv_module/rustism/*.so
 /vcv_module/rustism/dist
+*.wasm

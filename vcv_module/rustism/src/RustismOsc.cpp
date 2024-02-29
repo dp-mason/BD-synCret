@@ -31,7 +31,8 @@ struct RustismOsc : Module
 		configOutput(SINE_OUTPUT, "");
 	}
 
-	const char *manifest = "{\"wasm\": [{\"url\":\"../../rust_src/target/wasm32-unknown-unknown/release/oscillator.wasm\"}]}";
+	// TODO: replace absolute file path with output of (asset::plugin(pluginInstance, "res/oscillator.wasm")
+	const char *manifest = "{\"wasm\": [{\"path\":\"/home/david/.Rack2/plugins/rustism/res/oscillator.wasm\"}]}";
 
 	char *errmsg = NULL;
 	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
@@ -45,12 +46,16 @@ struct RustismOsc : Module
 
 	void process(const ProcessArgs &args) override
 	{
-		// call the wasm function once per second
-		if( (args.frame % int64_t(args.sampleRate)) == 0 ){
-			DEBUG("CALLING WASM FUNCTION AT TIME %f", args.sampleTime);
-			int rust_wasm_output = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t *)&args.sampleTime, sizeof(args.sampleTime));
-			DEBUG("OUTPUT: %d\n", rust_wasm_output);
+		float timeInput = float(args.frame * args.sampleTime)*440.0*2.0;
+		
+		int rc = extism_plugin_call(plugin, "rust_wasm_sine",(const uint8_t *)&timeInput, sizeof(args.sampleTime));
+		if (rc != EXTISM_SUCCESS) {
+			DEBUG("EXTISM PLUGIN CALL FAILURE");
 		}
+		
+		const uint8_t *rust_wasm_out_mem = extism_plugin_output_data(plugin);
+
+		outputs[SINE_OUTPUT].setVoltage(*((float*)(rust_wasm_out_mem)) * 10.0);
 	}
 };
 
