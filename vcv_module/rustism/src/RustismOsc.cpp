@@ -1,5 +1,15 @@
 #include "plugin.hpp"
 
+struct WasmInput
+{
+	float sample_rate;
+    float sample_time;
+    int64_t frame;
+    float pitch;
+    float phase;
+};
+
+
 struct RustismOsc : Module
 {
 	enum ParamId
@@ -45,17 +55,23 @@ struct RustismOsc : Module
 	// }
 
 	void process(const ProcessArgs &args) override
-	{
-		float timeInput = float(args.frame * args.sampleTime)*440.0*2.0;
-		
-		int rc = extism_plugin_call(plugin, "rust_wasm_sine",(const uint8_t *)&timeInput, sizeof(args.sampleTime));
+	{		
+		WasmInput input = WasmInput {
+			args.sampleRate,
+			args.sampleTime,
+			args.frame,
+			inputs[PITCH_INPUT].getVoltage(),
+			0.f
+		};
+
+		int rc = extism_plugin_call(plugin, "rust_wasm_sine",(const uint8_t *)&input, sizeof(args.sampleTime));
 		if (rc != EXTISM_SUCCESS) {
 			DEBUG("EXTISM PLUGIN CALL FAILURE");
 		}
 		
 		const uint8_t *rust_wasm_out_mem = extism_plugin_output_data(plugin);
 
-		outputs[SINE_OUTPUT].setVoltage(*((float*)(rust_wasm_out_mem)) * 10.0);
+		outputs[SINE_OUTPUT].setVoltage(*((float*)(rust_wasm_out_mem)));
 	}
 };
 
