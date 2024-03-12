@@ -1,12 +1,12 @@
 #include "plugin.hpp"
 
-struct WasmInput
+#pragma pack(1)
+struct ProcessArgs
 {
 	float sample_rate;
-    float sample_time;
-    int64_t frame;
-    float pitch;
-    float phase;
+    // float sample_time;
+    // float pitch;
+    // int64_t frame;
 };
 
 
@@ -42,7 +42,7 @@ struct RustismOsc : Module
 	}
 
 	// TODO: replace absolute file path with output of (asset::plugin(pluginInstance, "res/oscillator.wasm")
-	const char *manifest = "{\"wasm\": [{\"path\":\"/home/david/.Rack2/plugins/rustism/res/oscillator.wasm\"}]}";
+	const char *manifest = "{\"wasm\": [{\"path\":\"/home/bdc/.Rack2/plugins/rustism/res/oscillator.wasm\"}]}";
 
 	char *errmsg = NULL;
 	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
@@ -56,17 +56,20 @@ struct RustismOsc : Module
 
 	void process(const ProcessArgs &args) override
 	{		
-		WasmInput input = WasmInput {
-			args.sampleRate,
-			args.sampleTime,
-			args.frame,
-			inputs[PITCH_INPUT].getVoltage(),
-			0.f
+		ProcessArgs proc_args = ProcessArgs {
+			8.f
+			// args.sampleRate,
+			// args.sampleTime,
+			// inputs[PITCH_INPUT].getVoltage(),
+			// args.frame,
 		};
+		// const uint8_t json_input[] = "{\n\"sample_rate\":\"8.0\"\n}";
+		// float poop = 8.0f;
 
-		int rc = extism_plugin_call(plugin, "rust_wasm_sine",(const uint8_t *)&input, sizeof(args.sampleTime));
+		int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t *)&proc_args, sizeof(ProcessArgs));
 		if (rc != EXTISM_SUCCESS) {
 			DEBUG("EXTISM PLUGIN CALL FAILURE");
+			DEBUG("strken of ProcessArgs is %ld", sizeof(ProcessArgs));
 		}
 		
 		const uint8_t *rust_wasm_out_mem = extism_plugin_output_data(plugin);
