@@ -1,18 +1,24 @@
-Not much here yet...
+# Rustism Osc for VCV Rack
 
-Run what little is here with:
+## What? Why?
 
+This is an experiment to see if a VCV Rack plugin can be written in a language other than C++ via Web Assembly with the help of Extism. The idea occurred to me after a very short googling session seemed to suggest almost all audio programming is done in C++. It probably makes sense to program audio in C++ and there is no reason for anyone to switch, but hell, why not investigate ways to inject different languages into C++ infratructure.
+
+## Quick Start
+
+**TODO: THIS WONT RUN ON ARB ENVIRON BC OF A HARD CODED PATH IN THE VCV PLUGIN CPP FILE**
+
+*Maybe you won't be able to tell from the way this is structured, but believe it or not I am a software release engineer by profession*
+
+Download and install all prerequisites:
 ```
-cargo build --target wasm32-unknown-unknown
+./get_prereqs.sh
+```
+Build the plugin:
+```
+./rebuild_all.sh
 ```
 
-for smaller exec, compile with ```--release``` flag
-
-test with:
-
-```
-extism call target/wasm32-unknown-unknown/debug/my_plugin.wasm greet --input "867.5309"
-```
 
 USEFUL LINKS:
 - https://extism.org/docs/quickstart/plugin-quickstart/
@@ -20,9 +26,8 @@ USEFUL LINKS:
 - https://docs.rs/extism-pdk/latest/extism_pdk/
 - TODO: ADD MORE OF THE LINKS YOU HAVE BOOKMARKED
 
-WOW, ok, so it looks like this works, there are a good number of things that need to be done before I share thisi:
+WOW, ok, so it looks like this works, there are a good number of things that need to be done before I share this more widely:
 - fix the path to the wasm module so that it is not an absolute path, there was some trouble with constructing the manifest string
 - major restructure to improve the way that everything is organized
 - after reorganization, change the makefile or something so that the wasm module gets rebuilt when the rust source changes
-- add automation so that .wasm output file that is built gets moved to where it needs to be in the vcv module (make file? script?)
 - make it so that the rust code can accept v/oct input and proper time information and produces voltages -10.0 to 10.0 so proper tuned waves can be played/generated. make the process function in c++ vcv module do as little as possible simply handing off the values to Rust
