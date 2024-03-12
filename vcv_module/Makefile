@@ -1,4 +1,4 @@
-EXTISM_LIB_DIR = ../../extism/target/release
+EXTISM_LIB_DIR = ../extism/target/release
 STATIC_LINK_EXTISM_LIB = -L$(EXTISM_LIB_DIR) -l:libextism.a -lm
 
 # If RACK_DIR is not defined when calling the Makefile, default to two directories above

@@ -1,7 +1,7 @@
 /rust_src/target
 /rust_src/Cargo.lock
 /extism
-/vcv_module/rustism/build
-/vcv_module/rustism/*.so
-/vcv_module/rustism/dist
+/vcv_module/build
+/vcv_module/*.so
+/vcv_module/dist
 *.wasm
