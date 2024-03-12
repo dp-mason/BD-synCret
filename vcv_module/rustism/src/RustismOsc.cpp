@@ -63,13 +63,10 @@ struct RustismOsc : Module
 			// inputs[PITCH_INPUT].getVoltage(),
 			// args.frame,
 		};
-		// const uint8_t json_input[] = "{\n\"sample_rate\":\"8.0\"\n}";
-		// float poop = 8.0f;
 
 		int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t *)&proc_args, sizeof(ProcessArgs));
 		if (rc != EXTISM_SUCCESS) {
 			DEBUG("EXTISM PLUGIN CALL FAILURE");
-			DEBUG("strken of ProcessArgs is %ld", sizeof(ProcessArgs));
 		}
 		
 		const uint8_t *rust_wasm_out_mem = extism_plugin_output_data(plugin);
