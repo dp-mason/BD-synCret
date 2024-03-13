@@ -41,8 +41,8 @@ struct RustismOsc : Module
 		configOutput(SINE_OUTPUT, "");
 	}
 
-	// TODO: replace absolute file path with output of (asset::plugin(pluginInstance, "res/oscillator.wasm")
-	const char *manifest = "{\"wasm\": [{\"path\":\"/home/bdc/.Rack2/plugins/rustism/res/oscillator.wasm\"}]}";
+	std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/oscillator.wasm") + "\"}]}");
+	const char *manifest = man_str.c_str();
 
 	char *errmsg = NULL;
 	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
@@ -65,7 +65,7 @@ struct RustismOsc : Module
 		};
 
 		int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t *)&proc_args, sizeof(ProcessArgs));
-		if (rc != EXTISM_SUCCESS) {
+		if (rc != EXTISM_SUCCESS && args.frame % 10000 == 0) {
 			DEBUG("EXTISM PLUGIN CALL FAILURE");
 		}
 		
