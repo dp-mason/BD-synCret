@@ -17,15 +17,19 @@ Build the plugin:
 ./rebuild_all.sh
 ```
 
+## TODO
+
+WOW, ok, so it looks like this works, there are a good number of things that need to be done before I share this more widely:
+- after reorganization, change the makefile or something so that the wasm module gets rebuilt when the rust source changes
+- make it so that the rust code can accept v/oct input and proper time information and produces voltages -10.0 to 10.0 so proper tuned waves can be played/generated. make the process function in c++ vcv module do as little as possible simply handing off the values to Rust
+
+## Appendix
 
 USEFUL LINKS:
 - https://extism.org/docs/quickstart/plugin-quickstart/
 - https://github.com/extism/rust-pdk#readme
 - https://docs.rs/extism-pdk/latest/extism_pdk/
-- TODO: ADD MORE OF THE LINKS YOU HAVE BOOKMARKED
-
-WOW, ok, so it looks like this works, there are a good number of things that need to be done before I share this more widely:
-- fix the path to the wasm module so that it is not an absolute path, there was some trouble with constructing the manifest string
-- major restructure to improve the way that everything is organized
-- after reorganization, change the makefile or something so that the wasm module gets rebuilt when the rust source changes
-- make it so that the rust code can accept v/oct input and proper time information and produces voltages -10.0 to 10.0 so proper tuned waves can be played/generated. make the process function in c++ vcv module do as little as possible simply handing off the values to Rust
+- https://community.vcvrack.com/t/getting-loaded-plugin-path/10543
+- https://docs.rs/extism/latest/extism/trait.FromBytesOwned.html
+- https://docs.rs/extism/latest/extism/all.html#traits
+- https://www.metricpanda.com/rival-fortress-update-35-avoiding-automatic-structure-padding-in-c/
