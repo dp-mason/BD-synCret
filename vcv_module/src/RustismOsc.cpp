@@ -4,9 +4,10 @@
 struct ProcArgs
 {
 	float sample_rate;
-    // float sample_time;
-    // float pitch;
-    // int64_t frame;
+    float sample_time;
+    float pitch_input;
+    float pitch_param;
+    int64_t frame;
 };
 
 
@@ -47,32 +48,30 @@ struct RustismOsc : Module
 	char *errmsg = NULL;
 	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
 	
-
 	void process(const ProcessArgs &args) override
 	{		
-		if (plugin == NULL){
-			DEBUG("ERROR: %s\n", errmsg);
-			extism_plugin_new_error_free(errmsg);
-			exit(1);
-		}
+		ProcArgs proc_args = ProcArgs{
+			args.sampleRate,
+			args.sampleTime,
+			inputs[PITCH_INPUT].getVoltage(),
+			params[PITCH_PARAM].getValue(),
+			args.frame
+		};
 
-		float* num = new float(123.f);
-
-		int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t*)num, sizeof(float));
+		int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t*)&proc_args, sizeof(ProcArgs));
 		if (rc != EXTISM_SUCCESS && args.frame % 44000 == 0) {
+			if (plugin == NULL){
+				DEBUG("Manifest: %s", manifest);
+				DEBUG("ERROR: %s\n", errmsg);
+				extism_plugin_new_error_free(errmsg);
+				exit(1);
+			}
 			DEBUG("EXTISM PLUGIN CALL FAILURE: %s", extism_plugin_error(plugin));
 		}
 		
 		const float *out_float = (const float *)extism_plugin_output_data(plugin);
 		
-		if (args.frame % 44000 == 0) {
-			DEBUG("output is %f", *out_float);
-		}
-		
-
 		outputs[SINE_OUTPUT].setVoltage(*out_float);
-
-		delete(num);
 	}
 };
 
