@@ -1,7 +1,7 @@
 #include "plugin.hpp"
 
 #pragma pack(1)
-struct ProcessArgs
+struct ProcArgs
 {
 	float sample_rate;
     // float sample_time;
@@ -46,32 +46,33 @@ struct RustismOsc : Module
 
 	char *errmsg = NULL;
 	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
-	// TODO: not sure why the block below seems to be throwing an error that would suggest that something is 
-	// wrong with the line above
-	// if(plugin == NULL){
-	// 	DEBUG(stderr, "ERROR: %s\n", errmsg);
-	// 	extism_plugin_new_error_free(errmsg);
-	// 	exit(1);
-	// }
+	
 
 	void process(const ProcessArgs &args) override
 	{		
-		ProcessArgs proc_args = ProcessArgs {
-			8.f
-			// args.sampleRate,
-			// args.sampleTime,
-			// inputs[PITCH_INPUT].getVoltage(),
-			// args.frame,
-		};
+		if (plugin == NULL){
+			DEBUG("ERROR: %s\n", errmsg);
+			extism_plugin_new_error_free(errmsg);
+			exit(1);
+		}
 
-		int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t *)&proc_args, sizeof(ProcessArgs));
-		if (rc != EXTISM_SUCCESS && args.frame % 10000 == 0) {
-			DEBUG("EXTISM PLUGIN CALL FAILURE");
+		float* num = new float(123.f);
+
+		int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t*)num, sizeof(float));
+		if (rc != EXTISM_SUCCESS && args.frame % 44000 == 0) {
+			DEBUG("EXTISM PLUGIN CALL FAILURE: %s", extism_plugin_error(plugin));
 		}
 		
-		const uint8_t *rust_wasm_out_mem = extism_plugin_output_data(plugin);
+		const float *out_float = (const float *)extism_plugin_output_data(plugin);
+		
+		if (args.frame % 44000 == 0) {
+			DEBUG("output is %f", *out_float);
+		}
+		
 
-		outputs[SINE_OUTPUT].setVoltage(*((float*)(rust_wasm_out_mem)));
+		outputs[SINE_OUTPUT].setVoltage(*out_float);
+
+		delete(num);
 	}
 };
 
