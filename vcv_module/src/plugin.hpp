@@ -1,6 +1,6 @@
 #pragma once
 #include <rack.hpp>
-#include <extism.h>
+#include "../../extism/runtime/extism.h"
 #include <stdio.h>
 
 using namespace rack;
