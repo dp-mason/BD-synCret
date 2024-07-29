@@ -6,8 +6,6 @@ This is an experiment to see if a VCV Rack plugin can be written in a language o
 
 ## Quick Start
 
-*Maybe you won't be able to tell from the way this is structured, but believe it or not I am a software release engineer by profession*
-
 Download and install all prerequisites:
 ```
 ./get_prereqs.sh
