@@ -17,7 +17,7 @@ Build the plugin:
 
 ## TODO
 
-WOW, ok, so it looks like this works, there are a good number of things that need to be done before I share this more widely:
+So it looks like this works, next steps:
 - after reorganization, change the makefile or something so that the wasm module gets rebuilt when the rust source changes
 - make it so that the rust code can accept v/oct input and proper time information and produces voltages -10.0 to 10.0 so proper tuned waves can be played/generated. make the process function in c++ vcv module do as little as possible simply handing off the values to Rust
 
