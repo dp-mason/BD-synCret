@@ -18,6 +18,12 @@
       "name": "RustismOsc",
       "description": "Dead simple oscillator used to test if extism can be used to write audio plugins for vcv rack in alternative languages",
       "tags": []
+    },
+    {
+      "slug": "BD_synCret",
+      "name": "BD_synCret",
+      "description": "wasm host for vcv rack",
+      "tags": []
     }
   ]
 }
