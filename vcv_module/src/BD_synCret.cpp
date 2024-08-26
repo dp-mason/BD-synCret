@@ -1,4 +1,4 @@
-#define CACHESIZE 1
+#define CACHESIZE 128
 
 #include "plugin.hpp"
 
@@ -76,36 +76,41 @@ struct BD_synCret : Module {
 	char *errmsg = NULL;
 	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
 
-	float output_buf[CACHESIZE];
+	const float *output_buf;
 
 	void process(const ProcessArgs& args) override {
 		// pitch_input_buf[args.frame % INPUT_BUFSIZE] = ;
 		
 		if (args.frame % CACHESIZE == 0) {
-			for (size_t i = 0; i < CACHESIZE; i++)
-			{
-				ProcArgs proc_args = ProcArgs{
-					args.sampleTime,
-					// args.frame,
-					inputs[PITCH_INPUT].getVoltage(),
-				};
+			ProcArgs proc_args = ProcArgs{
+				args.sampleTime,
+				// args.frame,
+				inputs[PITCH_INPUT].getVoltage(),
+			};
 
-				int rc = extism_plugin_call(plugin, "rust_wasm_sine", (const uint8_t*)&proc_args, sizeof(ProcArgs));
-				if (rc != EXTISM_SUCCESS && args.frame % 44000 ==  0) {
-					if (plugin == NULL){
-						DEBUG("Manifest: %s", manifest);
-						DEBUG("ERROR: %s\n", errmsg);
-						extism_plugin_new_error_free(errmsg);
-						exit(1);
-					}
-					DEBUG("EXTISM PLUGIN CALL FAILURE: %s", extism_plugin_error(plugin));
+			int rc = extism_plugin_call(plugin, "batch_sine", (const uint8_t*)&proc_args, sizeof(ProcArgs));
+			if (rc != EXTISM_SUCCESS && args.frame % 44000 ==  0) {
+				if (plugin == NULL){
+					DEBUG("Manifest: %s", manifest);
+					DEBUG("ERROR: %s\n", errmsg);
+					extism_plugin_new_error_free(errmsg);
+					exit(1);
 				}
-				output_buf[i] = *(const float *)extism_plugin_output_data(plugin);
+				DEBUG("EXTISM PLUGIN CALL FAILURE: %s", extism_plugin_error(plugin));
 			}
+
+			output_buf = (const float *)extism_plugin_output_data(plugin);
+
+			if (output_buf == nullptr) {
+            	DEBUG("ERROR: Output buffer is NULL");
+            	return;
+        	}
 		}
 		
-		outputs[OUT_L_OUTPUT].setVoltage(output_buf[args.frame % CACHESIZE]);
-		outputs[OUT_R_OUTPUT].setVoltage(output_buf[args.frame % CACHESIZE]);
+		if (output_buf != nullptr) {
+			outputs[OUT_L_OUTPUT].setVoltage(output_buf[args.frame % CACHESIZE]);
+			outputs[OUT_R_OUTPUT].setVoltage(output_buf[args.frame % CACHESIZE]);
+		}
 	}
 };
 
