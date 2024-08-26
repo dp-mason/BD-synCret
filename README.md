@@ -1,15 +1,27 @@
-# Rustism Osc for VCV Rack
+# BD-synCret for VCV Rack
+
+An embedded VCV Rack Wasm host powered by Extism 
 
 ## What? Why?
 
 This is an experiment to see if a VCV Rack plugin can be written in a language other than C++ via Web Assembly with the help of Extism. The idea occurred to me after a very short googling session seemed to suggest almost all audio programming is done in C++. It probably makes sense to program audio in C++ and there is no reason for anyone to switch, but hell, why not investigate ways to inject different languages into C++ infrastructure.
 
+![Module Panel Design](/vcv_module/res/BD_synCret.svg)
+
 ## Quick Start
+
+Currently only tested on linux, but if you'd like to create scripts on your platform that do what the .sh files in here do then it should work for you. If you are non-linux visit the [install page for Extism](https://extism.org/docs/install/) to get started.
 
 Download and install all prerequisites:
 ```
 ./get_prereqs.sh
 ```
+
+Set your Rack User dir if it isn't already in your .bashrc. This is where the dirs that contain your patch files and your plugins live.
+```
+export RACK_USER_DIR=/home/<user>/.local/share/Rack2
+```
+
 Build the plugin:
 ```
 ./rebuild_all.sh
@@ -17,9 +29,8 @@ Build the plugin:
 
 ## TODO
 
-So it looks like this works, next steps:
-- after reorganization, change the makefile or something so that the wasm module gets rebuilt when the rust source changes
-- make it so that the rust code can accept v/oct input and proper time information and produces voltages -10.0 to 10.0 so proper tuned waves can be played/generated. make the process function in c++ vcv module do as little as possible simply handing off the values to Rust
+- Implement examples in a couple more languages?
+- Implement more complex, varied wave types
 
 ## Appendix
 
