@@ -88,7 +88,7 @@ struct BD_synCret : Module {
 				inputs[PITCH_INPUT].getVoltage(),
 			};
 
-			int rc = extism_plugin_call(plugin, "batch_sine", (const uint8_t*)&proc_args, sizeof(ProcArgs));
+			int rc = extism_plugin_call(plugin, "batch_compute_wf", (const uint8_t*)&proc_args, sizeof(ProcArgs));
 			if (rc != EXTISM_SUCCESS && args.frame % 44000 ==  0) {
 				if (plugin == NULL){
 					DEBUG("Manifest: %s", manifest);

@@ -18,7 +18,7 @@ const FLOAT32_BYTES:usize = 4;
 // }
 
 #[plugin_fn]
-pub fn batch_sine(input: Vec<u8>) -> FnResult<Vec<u8>> {
+pub fn batch_compute_wf(input: Vec<u8>) -> FnResult<Vec<u8>> {
     let sample_time: f32 = f32::from_le_bytes(input[0..4].try_into().unwrap());
     let voct_pitch: f32 = f32::from_le_bytes(input[4..8].try_into().unwrap());
     
