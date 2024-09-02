@@ -1,4 +1,4 @@
-#define CACHESIZE 128
+#define CACHESIZE 256
 
 #include "plugin.hpp"
 
@@ -110,6 +110,10 @@ struct BD_synCret : Module {
 		if (output_buf != nullptr) {
 			outputs[OUT_L_OUTPUT].setVoltage(output_buf[args.frame % CACHESIZE]);
 			outputs[OUT_R_OUTPUT].setVoltage(output_buf[args.frame % CACHESIZE]);
+		}
+		else {
+			outputs[OUT_L_OUTPUT].setVoltage(-1.0);
+			outputs[OUT_R_OUTPUT].setVoltage(-1.0);
 		}
 	}
 };
