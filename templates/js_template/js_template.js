@@ -5,9 +5,9 @@
 // ----------EXPOSED TO THE USER (BEGIN)----------
 // Phase represents the percentage progress that the wave has made through the wavelength
 //  10                          
-//    |\    |\    |\    |\    | 
+//    |\    |\    |\    @\    @ 
 //    | \   | \   | \   | \   | 
-//  --|--\--|--\--|--\--|--\--| 
+//  --|--@--|--@--|--\--|--\--|--
 //    |   \ |   \ |   \ |   \ | 
 //    |    \|    \|    \|    \| 
 // -10   ▲     ▲        ▲     ▲ 
@@ -17,37 +17,39 @@
 
 // lfoOne and lfoTwo are the current values (-10 to 10) of two "Low Frequency Oscillators", 
 // waves that can be used to change certain factors over time. for example, amplitude. 
-// Changing the amplitude would make the wave loader and quieter over time. Think of it like 
+// Changing the amplitude would make the wave louder and quieter over time. Think of it like 
 // automatically turning a knob up and down according to a slow sine wave.
 
+// "Modulation" is the word typically used to describe these sorts of repeated augmentations 
+
+// PHASE is a global constant in order to allow for smooth pitch modulation (like vibrato) between calls
+
+PHASE = new Float32Array([0.0])
+
 function compute_saw(timeElapsed, freq, lfoOne, lfoTwo) {
-  phase = (freq * timeElapsed) % 1.0;   // gets the remainder in order to compute the current phase
-  return (phase - 0.5) * -2.0 * lfoOne; // returns output amplitude from 10 to -10 "modulated" by LFO One
+  // Any frequency modulation should be done before the phase is calculated
+  PHASE[0] = (PHASE[0] + (freq * timeElapsed)) % 1.0; // gets the remainder in order to compute the current phase
+  amplitude = (PHASE[0] - 0.5) * -2.0 * lfoOne; // calculates output amplitude of saw from 10 to -10 "modulated" by LFO One
+  return amplitude
 }
 // ----------EXPOSED TO THE USER (END)----------
 
 
 const OUTBUF_SAMPLES = 256;
-const FLOAT32_BYTES  = 4;
-// const floatbuf = new Float32Array(128).fill(0.0);
-// const input_buffer = new ArrayBuffer(8).fill(0.0);
-const timeElapsed = new Float32Array([0.0]);
+// const FLOAT32_BYTES  = 4;
 const floatbuf = new Float32Array(OUTBUF_SAMPLES).fill(0.0);
-input_buffer = new Float32Array(2).fill(0.0);
+input_buffer = new Float32Array(4).fill(0.0);
 
 
 function batch_compute_wf() {
   input_buffer = new Float32Array(Host.inputBytes());
   const sample_time = input_buffer[0];
-  const voct_pitch = input_buffer[1];
-
-  
-  const freq = 261.6256 * Math.pow(2.0, voct_pitch)
+  const freq_hz = input_buffer[1];
+  const lfo_one = input_buffer[2];
+  const lfo_two = input_buffer[3];
   
   for (let sample = 0; sample < floatbuf.length; sample++) {
-    timeElapsed[0] += sample_time;
-    floatbuf[sample] = compute_saw(timeElapsed[0], freq, 10.0, 10.0);
-    // phase[0] = (phase[0] + (freq * sample_time)) % 1.0;
+    floatbuf[sample] = compute_saw(sample_time, freq_hz, lfo_one, lfo_two);
   }
 
   Host.outputBytes(floatbuf.buffer);

@@ -6,8 +6,9 @@
 struct ProcArgs
 {
 	float sample_time;
-    //int64_t frame;
-    float voct_pitch;
+    float freq_hz;
+	float lfo_one;
+	float lfo_two;
 };
 
 struct BD_synCret : Module {
@@ -82,11 +83,16 @@ struct BD_synCret : Module {
 		// pitch_input_buf[args.frame % INPUT_BUFSIZE] = ;
 		
 		if (args.frame % CACHESIZE == 0) {
+			
+			const float freq_hz = 261.6256 * std::pow(2.0, inputs[PITCH_INPUT].getVoltage());
+			
 			ProcArgs proc_args = ProcArgs{
 				args.sampleTime,
-				// args.frame,
-				inputs[PITCH_INPUT].getVoltage(),
+				freq_hz,
+				10.0,
+				10.0,
 			};
+
 
 			int rc = extism_plugin_call(plugin, "batch_compute_wf", (const uint8_t*)&proc_args, sizeof(ProcArgs));
 			if (rc != EXTISM_SUCCESS && args.frame % 44000 ==  0) {
