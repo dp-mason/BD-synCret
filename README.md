@@ -29,7 +29,6 @@ Build the plugin:
 
 ## TODO
 
-- deleting the instance of plugin and reopening results in seg fault, something might be getting cleaned up that extism tries to acess in the same place after reinstantiation
 - weird thing where when the js template runs for a minute or two it becomes glitched in a random looking way and cpu usage drops to zero, but calls to extism guest funcs is still reporting success codes...
 - Implement examples in a couple more languages?
 - Implement more complex, varied wave types
