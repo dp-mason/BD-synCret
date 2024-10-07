@@ -4,6 +4,9 @@ package main
 
 import (
 	"math"
+	"unsafe"
+
+	pdk "github.com/extism/go-pdk"
 )
 
 var PHASE float32 = 0.0
@@ -36,16 +39,18 @@ func BatchComputeWf() error {
 
 	// pdk.Output(unsafe.Slice((*byte)(unsafe.Pointer(&outBuf[0])), len(outBuf)*4))
 
-	var sampleTime float32 = 0.0
-	var freqHz float32 = 0.0
-	var lfoOne float32 = 0.0
-	var lfoTwo float32 = 0.0
+	var sampleTime float32 = 1.0
+	var freqHz float32 = 3.0
+	var lfoOne float32 = 3.0
+	var lfoTwo float32 = 3.0
 
 	outBuf := make([]float32, OUTBUF_SAMPLES)
 
 	for sample := 0; sample < len(outBuf); sample++ {
 		outBuf[sample] = ComputeSaw(sampleTime, freqHz, lfoOne, lfoTwo)
 	}
+
+	pdk.Output(unsafe.Slice((*byte)(unsafe.Pointer(&outBuf[0])), len(outBuf)*4))
 
 	return nil
 }
