@@ -18,9 +18,9 @@
 // lfoOne and lfoTwo are the current values (-10 to 10) of two "Low Frequency Oscillators", 
 // waves that can be used to change certain factors over time. for example, amplitude. 
 // Changing the amplitude would make the wave louder and quieter over time. Think of it like 
-// automatically turning a knob up and down according to a slow sine wave.
+// automatically turning the volume knob up and down according to a slow sine wave.
 
-// "Modulation" is the word typically used to describe these sorts of repeated augmentations 
+// "Modulation" is the word typically used to describe these sorts of procedural changes 
 
 // PHASE is a global constant in order to allow for smooth pitch modulation (like vibrato) between calls
 
