@@ -3,5 +3,9 @@ target/
 /extism
 /vcv_module/build
 /vcv_module/*.so
-/vcv_module/dist
 *.wasm
+dist/
+*.mod
+*.sum
+*pdk*
+*xtp*
