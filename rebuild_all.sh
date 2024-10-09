@@ -7,4 +7,7 @@ cp templates/rust_template/target/wasm32-unknown-unknown/release/rust_template.w
 (cd templates/js_template; extism-js -i js_template.d.ts js_template.js -o js_template.wasm;);
 cp templates/js_template/js_template.wasm vcv_module/res;
 
+(cd templates/go_template; tinygo build -target wasi -o go_template.wasm .);
+cp templates/go_template/go_template.wasm vcv_module/res;
+
 (cd vcv_module; ./dev_build_and_install.sh;);

@@ -71,7 +71,7 @@ struct BD_synCret : Module {
 		configOutput(OUT_6_OUTPUT, "");
 	}
 
-	std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/rust_template.wasm") + "\"}]}");
+	std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/go_template.wasm") + "\"}]}");
 	const char *manifest = man_str.c_str();
 
 	char *errmsg = NULL;
@@ -85,14 +85,13 @@ struct BD_synCret : Module {
 		if (args.frame % CACHESIZE == 0) {
 			
 			const float freq_hz = 261.6256 * std::pow(2.0, inputs[PITCH_INPUT].getVoltage());
-			
+
 			ProcArgs proc_args = ProcArgs{
 				args.sampleTime,
 				freq_hz,
-				10.0,
-				10.0,
+				inputs[I1_INPUT].isConnected() ? (float)inputs[I1_INPUT].getVoltage() : 1.0f,
+				inputs[I2_INPUT].isConnected() ? (float)inputs[I1_INPUT].getVoltage() : 1.0f,
 			};
-
 
 			int rc = extism_plugin_call(plugin, "batch_compute_wf", (const uint8_t*)&proc_args, sizeof(ProcArgs));
 			if (rc != EXTISM_SUCCESS && args.frame % 44000 ==  0) {
