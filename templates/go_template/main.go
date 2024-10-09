@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"math"
 	"unsafe"
 
@@ -39,10 +40,16 @@ func BatchComputeWf() error {
 
 	// pdk.Output(unsafe.Slice((*byte)(unsafe.Pointer(&outBuf[0])), len(outBuf)*4))
 
-	var sampleTime float32 = 1.0
-	var freqHz float32 = 3.0
-	var lfoOne float32 = 3.0
-	var lfoTwo float32 = 3.0
+	var input []byte = pdk.Input()
+	if len(input)%4 != 0 || len(input)/4 != 4 {
+		return errors.New("Improper Input")
+	}
+	var params []float32 = unsafe.Slice((*float32)(unsafe.Pointer(&input[0])), len(input)/4)
+
+	var sampleTime float32 = params[0]
+	var freqHz float32 = params[1]
+	var lfoOne float32 = params[2]
+	var lfoTwo float32 = params[3]
 
 	outBuf := make([]float32, OUTBUF_SAMPLES)
 
