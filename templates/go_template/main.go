@@ -27,23 +27,11 @@ func ComputeSaw(timeElapsed float32, freq float32, lfoOne float32, lfoTwo float3
 // BatchComputeWF processes the input buffer and outputs the saw wave data
 func BatchComputeWf() error {
 
-	// sampleTime := math.Float32frombits(pdk.ParamU32(0))
-	// freqHz := math.Float32frombits(pdk.ParamU32(1))
-	// lfoOne := math.Float32frombits(pdk.ParamU32(2))
-	// lfoTwo := math.Float32frombits(pdk.ParamU32(3))
-
-	// outBuf := make([]float32, OUTBUF_SAMPLES)
-
-	// for sample := 0; sample < len(outBuf); sample++ {
-	// 	outBuf[sample] = ComputeSaw(sampleTime, freqHz, lfoOne, lfoTwo)
-	// }
-
-	// pdk.Output(unsafe.Slice((*byte)(unsafe.Pointer(&outBuf[0])), len(outBuf)*4))
-
 	var input []byte = pdk.Input()
 	if len(input)%4 != 0 || len(input)/4 != 4 {
 		return errors.New("Improper Input")
 	}
+
 	var params []float32 = unsafe.Slice((*float32)(unsafe.Pointer(&input[0])), len(input)/4)
 
 	var sampleTime float32 = params[0]
@@ -53,6 +41,7 @@ func BatchComputeWf() error {
 
 	outBuf := make([]float32, OUTBUF_SAMPLES)
 
+	pdk.Log(pdk.LogError, "goop")
 	for sample := 0; sample < len(outBuf); sample++ {
 		outBuf[sample] = ComputeSaw(sampleTime, freqHz, lfoOne, lfoTwo)
 	}
