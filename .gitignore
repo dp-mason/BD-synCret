@@ -8,4 +8,7 @@ dist/
 *.mod
 *.sum
 *pdk*
+!pdk.zig
 *xtp*
+zig-out
+*zig-cache
