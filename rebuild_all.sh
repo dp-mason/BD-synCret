@@ -10,4 +10,7 @@ cp templates/js_template/js_template.wasm vcv_module/res;
 (cd templates/go_template; tinygo build -target wasi -o go_template.wasm .);
 cp templates/go_template/go_template.wasm vcv_module/res;
 
+(cd templates/zig_template; zig-build);
+cp templates/zig_template/zig-out/bin/plugin.wasm vcv_module/res/zig_template.wasm;
+
 (cd vcv_module; ./dev_build_and_install.sh;);

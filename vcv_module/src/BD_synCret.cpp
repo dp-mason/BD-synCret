@@ -71,7 +71,7 @@ struct BD_synCret : Module {
 		configOutput(OUT_6_OUTPUT, "");
 	}
 
-	std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/go_template.wasm") + "\"}]}");
+	std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/zig_template.wasm") + "\"}]}");
 	const char *manifest = man_str.c_str();
 
 	char *errmsg = NULL;
