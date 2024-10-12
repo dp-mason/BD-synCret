@@ -36,13 +36,9 @@ int32_t EXTISM_EXPORTED_FUNCTION(batch_compute_wf) {
   float lfo_two;
   memcpy(&lfo_two, inputData + 12, sizeof(float));
 
-  char buffer1[50];  // Make sure the buffer is large enough
-
   static uint8_t outputData[NUM_SAMPLES*4];
   for (size_t index = 0; index < NUM_SAMPLES; index = index+1)
   {
-    // sprintf(buffer1, "Sample time: %f", sample_time);
-    // extism_log_sz(buffer1, ExtismLogInfo);
     float sample_val = compute_saw(sample_time, freq_hz, lfo_one, lfo_two);
     memcpy(outputData+(index*4), &sample_val, sizeof(float));
   }
