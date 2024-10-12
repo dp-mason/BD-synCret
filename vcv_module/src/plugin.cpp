@@ -2,14 +2,12 @@
 
 
 Plugin* pluginInstance;
-extern Model* modelRustismOsc;
 extern Model* modelBD_synCret;
 
 void init(Plugin* p) {
 	pluginInstance = p;
 
 	// Add modules here
-	p->addModel(modelRustismOsc);
 	p->addModel(modelBD_synCret);
 
 	// Any other plugin initialization may go here.
