@@ -157,6 +157,10 @@ struct BD_synCretWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(76.2, 108.713)), module, BD_synCret::OUT_4_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(91.44, 108.713)), module, BD_synCret::OUT_5_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(106.68, 108.713)), module, BD_synCret::OUT_6_OUTPUT));
+
+		TextDisplay* text_display = createWidget<TextDisplay>(Vec(RACK_GRID_WIDTH, 100.00));
+		text_display->changeText();
+		addChild(text_display);
 	}
 };
 
