@@ -12,6 +12,8 @@ struct ProcArgs
 };
 
 struct BD_synCret : Module {
+
+
 	enum ParamId {
 		P0_PARAM,
 		P1_PARAM,
@@ -74,12 +76,17 @@ struct BD_synCret : Module {
 	std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/c_template.wasm") + "\"}]}");
 	const char *manifest = man_str.c_str();
 
-	char *errmsg = NULL;
+	char *errmsg = nullptr;
 	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
 
-	const float *output_buf;
+	const float* output_buf = nullptr;
+	TextDisplay* text_display = nullptr;
 
 	void process(const ProcessArgs& args) override {
+		if (args.frame % 88000 == 0 && text_display != nullptr) {
+			text_display->changeText();
+		}
+
 		// pitch_input_buf[args.frame % INPUT_BUFSIZE] = ;
 		
 		if (args.frame % CACHESIZE == 0) {
@@ -104,7 +111,7 @@ struct BD_synCret : Module {
 				DEBUG("EXTISM PLUGIN CALL FAILURE: %s", extism_plugin_error(plugin));
 			}
 
-			output_buf = (const float *)extism_plugin_output_data(plugin);
+			output_buf = (float*)extism_plugin_output_data(plugin);
 
 			if (output_buf == nullptr) {
             	DEBUG("ERROR: Output buffer is NULL");
@@ -159,8 +166,10 @@ struct BD_synCretWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(106.68, 108.713)), module, BD_synCret::OUT_6_OUTPUT));
 
 		TextDisplay* text_display = createWidget<TextDisplay>(Vec(RACK_GRID_WIDTH, 100.00));
-		text_display->changeText();
 		addChild(text_display);
+		if(module){
+			module->text_display = text_display;
+		}
 	}
 };
 
