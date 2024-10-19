@@ -84,7 +84,7 @@ struct BD_synCret : Module {
 
 	void process(const ProcessArgs& args) override {
 		if (args.frame % 88000 == 0 && text_display != nullptr) {
-			text_display->changeText();
+			text_display->changeText("Bungo");
 		}
 
 		// pitch_input_buf[args.frame % INPUT_BUFSIZE] = ;
@@ -170,6 +170,18 @@ struct BD_synCretWidget : ModuleWidget {
 		if(module){
 			module->text_display = text_display;
 		}
+		
+	}
+
+	void appendContextMenu(Menu *menu) override
+    {
+		// TODO: Add logic here for setting the path to the Wasm module
+		// For spacing only
+        menu->addChild(new MenuEntry);
+		// For spacing only
+        menu->addChild(new MenuSeparator);
+		// For spacing only
+        menu->addChild(new MenuEntry);
 	}
 };
 

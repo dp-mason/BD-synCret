@@ -20,8 +20,8 @@ struct TextDisplay : TransparentWidget {
     font = APP->window->loadFont(asset::plugin(pluginInstance, "res/UbuntuMono-Regular.ttf"));
   }
 
-  void changeText ( ) {
-    text = "boop";
+  void changeText (std::string display_text) {
+    text = display_text;
   }
 
   void draw (const DrawArgs &args) override {
