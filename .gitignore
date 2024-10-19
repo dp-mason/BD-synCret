@@ -12,3 +12,4 @@ dist/
 *xtp*
 zig-out
 *zig-cache
+.vscode/
