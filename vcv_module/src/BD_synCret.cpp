@@ -2,6 +2,7 @@
 
 #include "plugin.hpp"
 #include "osdialog.h"
+#include <patch.hpp>
 
 #pragma pack(1)
 struct ProcArgs
@@ -76,10 +77,7 @@ struct BD_synCret : Module {
 	// OLD
 	// std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/c_template.wasm") + "\"}]}");
 	// const char *manifest = man_str.c_str();
-	osdialog_filters wasm_filter{
-		(char *)"*.wasm",
-		nullptr
-	};
+	
 	
 	std::string man_str = "";
 	const char *manifest = man_str.c_str();
@@ -87,15 +85,15 @@ struct BD_synCret : Module {
 	char *errmsg = nullptr;
 	// OLD
 	// ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
-	ExtismPlugin *plugin;
+	ExtismPlugin *plugin = nullptr;
 
 	const float* output_buf = nullptr;
 	TextDisplay* text_display = nullptr;
 
 	void process(const ProcessArgs& args) override {
 		
-		// exit early if the wasm module path has not been set
-		if(man_str == ""){
+		// exit early if the plugin has not been set
+		if(!plugin){
 			return;
 		}
 
@@ -139,37 +137,61 @@ struct BD_synCret : Module {
 			outputs[OUT_L_OUTPUT].setVoltage(-1.0);
 			outputs[OUT_R_OUTPUT].setVoltage(-1.0);
 		}
+
+		return;
 	}
 
 	std::string selectPathVCV()
     {
 		std::string proj_path = APP->patch->path.substr(0, APP->patch->path.rfind("/") + 1);
-        std::string path_string = "";
-        char *path = osdialog_file(OSDIALOG_OPEN, path_string.c_str(), NULL, NULL);
+		//auto proj_path = APP->patch;
 
-        if (path != NULL)
-        {
-            path_string.assign(path);
-            std::free(path);
-        }
-
-        return (path_string);
-
-        /*
-        osdialog_filters* filters = osdialog_filters_parse("WAV:wav");
-        char *filename = osdialog_file(OSDIALOG_OPEN, samples_root_dir.c_str(), NULL, filters);
+        osdialog_filters* filters = osdialog_filters_parse("WASM:wasm");
+        char *filename = osdialog_file(OSDIALOG_OPEN, proj_path.c_str(), NULL, filters);
         osdialog_filters_free(filters);
         std::string filename_string(filename);
+		DEBUG("Returning selected path to file: %s", filename_string.c_str());
         return(filename_string);
-        */
+
+
+        // if (path != NULL)
+        // {
+        //     path_string.assign(path);
+        //     std::free(path);
+        // }
+		// else {
+		// 	DEBUG("ERROR: Path is NULL");
+		// }
+
+        // return (path_string);
+
+        // osdialog_filter_patterns wasm_filter{
+		// 	(char *)"*.wasm",
+		// 	nullptr,
+		// };
+		// osdialog_filters filters{
+		// 	nullptr,
+		// 	&wasm_filter,
+		// 	nullptr
+		// };
+		
     }
 
 	void load_wasm_from_path(std::string wasm_path){
-		man_str = std::string("{\"wasm\": [{\"path\":\"" + wasm_path + "\"}]}");
-		manifest = man_str.c_str();
-		errmsg = nullptr;
-		plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
-		text_display->text = wasm_path; 
+		DEBUG("Loading wasm from supplied path");
+		this->man_str = std::string("{\"wasm\": [{\"path\":\"" + wasm_path + "\"}]}");
+		this->manifest = man_str.c_str();
+		this->errmsg = nullptr;
+		if (!plugin){
+			free(plugin);
+			plugin = nullptr;
+		}
+		DEBUG("New Manifest Contents:\n\n%s\n\n", manifest);
+		this->plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
+		DEBUG("Plugin Assigned Successfully");
+		text_display->text = wasm_path;
+
+		return;
 	}
 };
 
@@ -198,6 +220,7 @@ struct WasmPathItem : MenuItem
 
 	static void pathSelected(BD_synCret *module, std::string path)
 	{
+		DEBUG("Path Selected Function");
 		if (path != ""){
 			module->load_wasm_from_path(path);
 		}
@@ -249,8 +272,9 @@ struct BD_synCretWidget : ModuleWidget {
 
 	void appendContextMenu(Menu *menu) override
     {
-		MenuItem *set_module_path_entry = new WasmPathItem;
+		WasmPathItem *set_module_path_entry = new WasmPathItem;
 		set_module_path_entry->text = "Set Path to Wasm Module";
+		set_module_path_entry->module = dynamic_cast<BD_synCret *>(this->module);
         menu->addChild(set_module_path_entry);
 	}
 };
