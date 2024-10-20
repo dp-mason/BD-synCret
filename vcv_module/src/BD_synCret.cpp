@@ -1,6 +1,7 @@
 #define CACHESIZE 256
 
 #include "plugin.hpp"
+#include "osdialog.h"
 
 #pragma pack(1)
 struct ProcArgs
@@ -12,7 +13,6 @@ struct ProcArgs
 };
 
 struct BD_synCret : Module {
-
 
 	enum ParamId {
 		P0_PARAM,
@@ -73,18 +73,30 @@ struct BD_synCret : Module {
 		configOutput(OUT_6_OUTPUT, "");
 	}
 
-	std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/c_template.wasm") + "\"}]}");
+	// OLD
+	// std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/c_template.wasm") + "\"}]}");
+	// const char *manifest = man_str.c_str();
+	osdialog_filters wasm_filter{
+		(char *)"*.wasm",
+		nullptr
+	};
+	
+	std::string man_str = "";
 	const char *manifest = man_str.c_str();
 
 	char *errmsg = nullptr;
-	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
+	// OLD
+	// ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
+	ExtismPlugin *plugin;
 
 	const float* output_buf = nullptr;
 	TextDisplay* text_display = nullptr;
 
 	void process(const ProcessArgs& args) override {
-		if (args.frame % 88000 == 0 && text_display != nullptr) {
-			text_display->changeText("Bungo");
+		
+		// exit early if the wasm module path has not been set
+		if(man_str == ""){
+			return;
 		}
 
 		// pitch_input_buf[args.frame % INPUT_BUFSIZE] = ;
@@ -101,7 +113,7 @@ struct BD_synCret : Module {
 			};
 
 			int rc = extism_plugin_call(plugin, "batch_compute_wf", (const uint8_t*)&proc_args, sizeof(ProcArgs));
-			if (rc != EXTISM_SUCCESS && args.frame % 44000 ==  0) {
+			if (rc != EXTISM_SUCCESS) {
 				if (plugin == NULL){
 					DEBUG("Manifest: %s", manifest);
 					DEBUG("ERROR: %s\n", errmsg);
@@ -128,8 +140,70 @@ struct BD_synCret : Module {
 			outputs[OUT_R_OUTPUT].setVoltage(-1.0);
 		}
 	}
+
+	std::string selectPathVCV()
+    {
+		std::string proj_path = APP->patch->path.substr(0, APP->patch->path.rfind("/") + 1);
+        std::string path_string = "";
+        char *path = osdialog_file(OSDIALOG_OPEN, path_string.c_str(), NULL, NULL);
+
+        if (path != NULL)
+        {
+            path_string.assign(path);
+            std::free(path);
+        }
+
+        return (path_string);
+
+        /*
+        osdialog_filters* filters = osdialog_filters_parse("WAV:wav");
+        char *filename = osdialog_file(OSDIALOG_OPEN, samples_root_dir.c_str(), NULL, filters);
+        osdialog_filters_free(filters);
+        std::string filename_string(filename);
+        return(filename_string);
+        */
+    }
+
+	void load_wasm_from_path(std::string wasm_path){
+		man_str = std::string("{\"wasm\": [{\"path\":\"" + wasm_path + "\"}]}");
+		manifest = man_str.c_str();
+		errmsg = nullptr;
+		plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
+		text_display->text = wasm_path; 
+	}
 };
 
+// ----- Adapted from VoxGlitch WavBank Source code -----
+//    https://github.com/clone45/voxglitch/blob/master/src/WavBank/WavBankWidget.hpp
+struct WasmPathItem : MenuItem
+{
+	BD_synCret *module;
+
+	void onAction(const event::Action &e) override
+	{
+		// #ifdef USING_CARDINAL_NOT_RACK
+		//     WavBank *module = this->module;
+		//     async_dialog_filebrowser(false, NULL, module->samples_root_dir.c_str(), "Load sample", [module](char *path) {
+		//       if (path) {
+		//         if (char *rpath = strrchr(path, CARDINAL_OS_SEP))
+		//           *rpath = '\0';
+		//         pathSelected(module, path);
+		//         free(path);
+		//       }
+		//     });
+		// #else
+		pathSelected(module, module->selectPathVCV());
+		// #endif
+	}
+
+	static void pathSelected(BD_synCret *module, std::string path)
+	{
+		if (path != ""){
+			module->load_wasm_from_path(path);
+		}
+	}
+};
+// ------------------------------------------------------
 
 struct BD_synCretWidget : ModuleWidget {
 	BD_synCretWidget(BD_synCret* module) {
@@ -175,15 +249,10 @@ struct BD_synCretWidget : ModuleWidget {
 
 	void appendContextMenu(Menu *menu) override
     {
-		// TODO: Add logic here for setting the path to the Wasm module
-		// For spacing only
-        menu->addChild(new MenuEntry);
-		// For spacing only
-        menu->addChild(new MenuSeparator);
-		// For spacing only
-        menu->addChild(new MenuEntry);
+		MenuItem *set_module_path_entry = new WasmPathItem;
+		set_module_path_entry->text = "Set Path to Wasm Module";
+        menu->addChild(set_module_path_entry);
 	}
 };
 
-
-Model* modelBD_synCret = createModel<BD_synCret, BD_synCretWidget>("BD_synCret");
+Model *modelBD_synCret = createModel<BD_synCret, BD_synCretWidget>("BD_synCret");
