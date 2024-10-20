@@ -74,17 +74,10 @@ struct BD_synCret : Module {
 		configOutput(OUT_6_OUTPUT, "");
 	}
 
-	// OLD
-	// std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/c_template.wasm") + "\"}]}");
-	// const char *manifest = man_str.c_str();
-	
-	
 	std::string man_str = "";
 	const char *manifest = man_str.c_str();
 
 	char *errmsg = nullptr;
-	// OLD
-	// ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
 	ExtismPlugin *plugin = nullptr;
 
 	const float* output_buf = nullptr;
@@ -93,12 +86,11 @@ struct BD_synCret : Module {
 	void process(const ProcessArgs& args) override {
 		
 		// exit early if the plugin has not been set
-		if(!plugin){
+		if(plugin == nullptr){
 			return;
 		}
 
-		// pitch_input_buf[args.frame % INPUT_BUFSIZE] = ;
-		
+		// Fill the Output buffer with new audio data
 		if (args.frame % CACHESIZE == 0) {
 			
 			const float freq_hz = 261.6256 * std::pow(2.0, inputs[PITCH_INPUT].getVoltage());
@@ -144,7 +136,6 @@ struct BD_synCret : Module {
 	std::string selectPathVCV()
     {
 		std::string proj_path = APP->patch->path.substr(0, APP->patch->path.rfind("/") + 1);
-		//auto proj_path = APP->patch;
 
         osdialog_filters* filters = osdialog_filters_parse("WASM:wasm");
         char *filename = osdialog_file(OSDIALOG_OPEN, proj_path.c_str(), NULL, filters);
@@ -152,29 +143,6 @@ struct BD_synCret : Module {
         std::string filename_string(filename);
 		DEBUG("Returning selected path to file: %s", filename_string.c_str());
         return(filename_string);
-
-
-        // if (path != NULL)
-        // {
-        //     path_string.assign(path);
-        //     std::free(path);
-        // }
-		// else {
-		// 	DEBUG("ERROR: Path is NULL");
-		// }
-
-        // return (path_string);
-
-        // osdialog_filter_patterns wasm_filter{
-		// 	(char *)"*.wasm",
-		// 	nullptr,
-		// };
-		// osdialog_filters filters{
-		// 	nullptr,
-		// 	&wasm_filter,
-		// 	nullptr
-		// };
-		
     }
 
 	void load_wasm_from_path(std::string wasm_path){
@@ -189,7 +157,7 @@ struct BD_synCret : Module {
 		DEBUG("New Manifest Contents:\n\n%s\n\n", manifest);
 		this->plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
 		DEBUG("Plugin Assigned Successfully");
-		text_display->text = wasm_path;
+		this->text_display->changeText(wasm_path);
 
 		return;
 	}
