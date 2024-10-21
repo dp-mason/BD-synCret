@@ -12,7 +12,7 @@ extern Plugin* pluginInstance;
 // extern Model* modelMyModule;
 
 struct TextDisplay : TransparentWidget {
-  const char* text = "Use The Menu to set the Wasm Module";
+  std::string text = "Use The Menu to set the Wasm Module";
   
   std::shared_ptr<Font> font;
 
@@ -21,7 +21,7 @@ struct TextDisplay : TransparentWidget {
   }
 
   void changeText (std::string display_text) {
-    this->text = display_text.c_str();
+    this->text = display_text;
   }
 
   void draw (const DrawArgs &args) override {
@@ -30,8 +30,8 @@ struct TextDisplay : TransparentWidget {
     nvgTextLetterSpacing(args.vg, 1);
 
     nvgBeginPath(args.vg);
-    nvgFillColor(args.vg, nvgRGBA(0xa8, 0x81, 0x09, 0xff));
+    nvgFillColor(args.vg, nvgRGBA(0xFF, 0xFF, 0xFF, 0xFF));
 
-    nvgText(args.vg, 0, 0, text, NULL);
+    nvgText(args.vg, 0, 0, this->text.c_str(), NULL);
   }
 };

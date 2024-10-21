@@ -156,8 +156,10 @@ struct BD_synCret : Module {
 		}
 		DEBUG("New Manifest Contents:\n\n%s\n\n", manifest);
 		this->plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
-		DEBUG("Plugin Assigned Successfully");
-		this->text_display->changeText(wasm_path);
+		DEBUG("Plugin Loaded Successfully");
+		std::string label_string = wasm_path.substr(wasm_path.rfind("/") + 1, wasm_path.rfind(".wasm"));
+		DEBUG("Label String: %s", label_string.c_str());
+		this->text_display->text = label_string.c_str();
 
 		return;
 	}
