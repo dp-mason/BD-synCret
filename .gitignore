@@ -1,6 +1,6 @@
 target/
 *.lock
-/extism
+extism/
 /vcv_module/build
 /vcv_module/*.so
 *.wasm
@@ -12,3 +12,4 @@ dist/
 *xtp*
 zig-out
 *zig-cache
+.vscode/

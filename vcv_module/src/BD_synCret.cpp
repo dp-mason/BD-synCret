@@ -1,6 +1,8 @@
 #define CACHESIZE 256
 
 #include "plugin.hpp"
+#include "osdialog.h"
+#include <patch.hpp>
 
 #pragma pack(1)
 struct ProcArgs
@@ -12,6 +14,7 @@ struct ProcArgs
 };
 
 struct BD_synCret : Module {
+
 	enum ParamId {
 		P0_PARAM,
 		P1_PARAM,
@@ -71,17 +74,23 @@ struct BD_synCret : Module {
 		configOutput(OUT_6_OUTPUT, "");
 	}
 
-	std::string man_str = std::string("{\"wasm\": [{\"path\":\"" + asset::plugin(pluginInstance, "res/c_template.wasm") + "\"}]}");
+	std::string man_str = "";
 	const char *manifest = man_str.c_str();
 
-	char *errmsg = NULL;
-	ExtismPlugin *plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
+	char *errmsg = nullptr;
+	ExtismPlugin *plugin = nullptr;
 
-	const float *output_buf;
+	const float* output_buf = nullptr;
+	TextDisplay* text_display = nullptr;
 
 	void process(const ProcessArgs& args) override {
-		// pitch_input_buf[args.frame % INPUT_BUFSIZE] = ;
 		
+		// exit early if the plugin has not been set
+		if(plugin == nullptr){
+			return;
+		}
+
+		// Fill the Output buffer with new audio data
 		if (args.frame % CACHESIZE == 0) {
 			
 			const float freq_hz = 261.6256 * std::pow(2.0, inputs[PITCH_INPUT].getVoltage());
@@ -94,7 +103,7 @@ struct BD_synCret : Module {
 			};
 
 			int rc = extism_plugin_call(plugin, "batch_compute_wf", (const uint8_t*)&proc_args, sizeof(ProcArgs));
-			if (rc != EXTISM_SUCCESS && args.frame % 44000 ==  0) {
+			if (rc != EXTISM_SUCCESS) {
 				if (plugin == NULL){
 					DEBUG("Manifest: %s", manifest);
 					DEBUG("ERROR: %s\n", errmsg);
@@ -104,7 +113,7 @@ struct BD_synCret : Module {
 				DEBUG("EXTISM PLUGIN CALL FAILURE: %s", extism_plugin_error(plugin));
 			}
 
-			output_buf = (const float *)extism_plugin_output_data(plugin);
+			output_buf = (float*)extism_plugin_output_data(plugin);
 
 			if (output_buf == nullptr) {
             	DEBUG("ERROR: Output buffer is NULL");
@@ -120,9 +129,74 @@ struct BD_synCret : Module {
 			outputs[OUT_L_OUTPUT].setVoltage(-1.0);
 			outputs[OUT_R_OUTPUT].setVoltage(-1.0);
 		}
+
+		return;
+	}
+
+	std::string selectPathVCV()
+    {
+		std::string proj_path = APP->patch->path.substr(0, APP->patch->path.rfind("/") + 1);
+
+        osdialog_filters* filters = osdialog_filters_parse("WASM:wasm");
+        char *filename = osdialog_file(OSDIALOG_OPEN, proj_path.c_str(), NULL, filters);
+        osdialog_filters_free(filters);
+        std::string filename_string(filename);
+		DEBUG("Returning selected path to file: %s", filename_string.c_str());
+        return(filename_string);
+    }
+
+	void load_wasm_from_path(std::string wasm_path){
+		DEBUG("Loading wasm from supplied path");
+		this->man_str = std::string("{\"wasm\": [{\"path\":\"" + wasm_path + "\"}]}");
+		this->manifest = man_str.c_str();
+		this->errmsg = nullptr;
+		if (!plugin){
+			free(plugin);
+			plugin = nullptr;
+		}
+		DEBUG("New Manifest Contents:\n\n%s\n\n", manifest);
+		this->plugin = extism_plugin_new((const uint8_t *)manifest, strlen(manifest), NULL, 0, true, &errmsg);
+		DEBUG("Plugin Loaded Successfully");
+		std::string label_string = wasm_path.substr(wasm_path.rfind("/") + 1, wasm_path.rfind(".wasm"));
+		DEBUG("Label String: %s", label_string.c_str());
+		this->text_display->text = label_string.c_str();
+
+		return;
 	}
 };
 
+// ----- Adapted from VoxGlitch WavBank Source code -----
+//    https://github.com/clone45/voxglitch/blob/master/src/WavBank/WavBankWidget.hpp
+struct WasmPathItem : MenuItem
+{
+	BD_synCret *module;
+
+	void onAction(const event::Action &e) override
+	{
+		// #ifdef USING_CARDINAL_NOT_RACK
+		//     WavBank *module = this->module;
+		//     async_dialog_filebrowser(false, NULL, module->samples_root_dir.c_str(), "Load sample", [module](char *path) {
+		//       if (path) {
+		//         if (char *rpath = strrchr(path, CARDINAL_OS_SEP))
+		//           *rpath = '\0';
+		//         pathSelected(module, path);
+		//         free(path);
+		//       }
+		//     });
+		// #else
+		pathSelected(module, module->selectPathVCV());
+		// #endif
+	}
+
+	static void pathSelected(BD_synCret *module, std::string path)
+	{
+		DEBUG("Path Selected Function");
+		if (path != ""){
+			module->load_wasm_from_path(path);
+		}
+	}
+};
+// ------------------------------------------------------
 
 struct BD_synCretWidget : ModuleWidget {
 	BD_synCretWidget(BD_synCret* module) {
@@ -157,8 +231,22 @@ struct BD_synCretWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(76.2, 108.713)), module, BD_synCret::OUT_4_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(91.44, 108.713)), module, BD_synCret::OUT_5_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(106.68, 108.713)), module, BD_synCret::OUT_6_OUTPUT));
+
+		TextDisplay* text_display = createWidget<TextDisplay>(Vec(RACK_GRID_WIDTH, 100.00));
+		addChild(text_display);
+		if(module){
+			module->text_display = text_display;
+		}
+		
+	}
+
+	void appendContextMenu(Menu *menu) override
+    {
+		WasmPathItem *set_module_path_entry = new WasmPathItem;
+		set_module_path_entry->text = "Set Path to Wasm Module";
+		set_module_path_entry->module = dynamic_cast<BD_synCret *>(this->module);
+        menu->addChild(set_module_path_entry);
 	}
 };
 
-
-Model* modelBD_synCret = createModel<BD_synCret, BD_synCretWidget>("BD_synCret");
+Model *modelBD_synCret = createModel<BD_synCret, BD_synCretWidget>("BD_synCret");
