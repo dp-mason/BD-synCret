@@ -1,3 +1,7 @@
+# DEPRECATED
+
+Visit the successor to this project created in collaboration with Dylibso called [sQuinth](https://github.com/dylibso/squinth)
+
 # BD-synCret for VCV Rack
 
 An embedded VCV Rack Wasm host powered by Extism 
